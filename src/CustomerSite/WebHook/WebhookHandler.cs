@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Marketplace.SaaS.Accelerator.CustomerSite.Integration;
 using Marketplace.SaaS.Accelerator.DataAccess.Contracts;
 using Marketplace.SaaS.Accelerator.DataAccess.Entities;
 using Marketplace.SaaS.Accelerator.Services.Contracts;
@@ -91,6 +92,8 @@ public class WebHookHandler : IWebhookHandler
 
     private readonly IOfferAttributesRepository offersAttributeRepository;
 
+    private readonly MarketplaceIntegrator marketplaceIntegrator;
+
     private const string AcceptSubscriptionUpdates = "AcceptSubscriptionUpdates";
 
     /// <summary>
@@ -123,7 +126,8 @@ public class WebHookHandler : IWebhookHandler
                           IEventsRepository eventsRepository, 
                           IApplicationConfigRepository applicationConfigRepository, 
                           IEmailTemplateRepository emailTemplateRepository, 
-                          IPlanEventsMappingRepository planEventsMappingRepository)
+                          IPlanEventsMappingRepository planEventsMappingRepository,
+                          MarketplaceIntegrator marketplaceIntegrator)
     {
         this.applicationLogRepository = applicationLogRepository;
         this.subscriptionsRepository = subscriptionsRepository;
@@ -141,6 +145,7 @@ public class WebHookHandler : IWebhookHandler
         this.emailTemplateRepository = emailTemplateRepository;
         this.planEventsMappingRepository = planEventsMappingRepository;
         this.offersRepository = offersRepository;
+        this.marketplaceIntegrator = marketplaceIntegrator;
         this.notificationStatusHandlers = new NotificationStatusHandler(
             fulfillApiService,
             planRepository,
@@ -188,6 +193,9 @@ public class WebHookHandler : IWebhookHandler
         await this.applicationLogService.AddApplicationLog("Plan Successfully Changed.").ConfigureAwait(false);
         auditLog.NewValue = payload.PlanId;
         this.subscriptionsLogRepository.Save(auditLog);
+
+        await marketplaceIntegrator.ChangePlan(payload.SubscriptionId, payload.PlanId).ConfigureAwait(false);
+
         await Task.CompletedTask;
     }
 
@@ -226,6 +234,9 @@ public class WebHookHandler : IWebhookHandler
         await this.applicationLogService.AddApplicationLog("Quantity Successfully Changed.").ConfigureAwait(false);
         auditLog.NewValue = payload.Quantity.ToString();
         this.subscriptionsLogRepository.Save(auditLog);
+
+        await marketplaceIntegrator.ChangeQuantity(payload.SubscriptionId, payload.Quantity).ConfigureAwait(false);
+
         await Task.CompletedTask;
     }
 
@@ -275,6 +286,8 @@ public class WebHookHandler : IWebhookHandler
 
         this.subscriptionsLogRepository.Save(auditLog); 
 
+        await marketplaceIntegrator.Reinstate(payload.SubscriptionId).ConfigureAwait(false);
+
         await Task.CompletedTask;
     }
 
@@ -283,9 +296,11 @@ public class WebHookHandler : IWebhookHandler
     /// </summary>
     /// <param name="payload">The payload.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task RenewedAsync()
+    public async Task RenewedAsync(WebhookPayload payload)
     {
         await this.applicationLogService.AddApplicationLog("Offer Successfully Renewed.").ConfigureAwait(false);
+
+        await marketplaceIntegrator.Renew(payload.SubscriptionId).ConfigureAwait(false);
 
         await Task.CompletedTask;
     }
@@ -316,6 +331,8 @@ public class WebHookHandler : IWebhookHandler
             this.subscriptionsLogRepository.Save(auditLog);
         }
 
+        await marketplaceIntegrator.Suspend(payload.SubscriptionId).ConfigureAwait(false);
+
         await Task.CompletedTask;
     }
 
@@ -345,6 +362,8 @@ public class WebHookHandler : IWebhookHandler
         }
 
         this.notificationStatusHandlers.Process(payload.SubscriptionId);
+
+        await marketplaceIntegrator.Unsubscribe(payload.SubscriptionId).ConfigureAwait(false);
 
         await Task.CompletedTask;
     }
