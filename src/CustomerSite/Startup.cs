@@ -3,6 +3,7 @@
 
 using Azure.Identity;
 using Marketplace.SaaS.Accelerator.CustomerSite.Controllers;
+using Marketplace.SaaS.Accelerator.CustomerSite.Integration;
 using Marketplace.SaaS.Accelerator.CustomerSite.WebHook;
 using Marketplace.SaaS.Accelerator.DataAccess.Context;
 using Marketplace.SaaS.Accelerator.DataAccess.Contracts;
@@ -113,6 +114,10 @@ public class Startup
 
         services
             .AddDbContext<SaasKitContext>(options => options.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection")));
+
+        services
+            .Configure<JinagaConfiguration>(Configuration.GetSection("JinagaConfiguration"))
+            .AddSingleton(JinagaClientFactory.Create);
 
         InitializeRepositoryServices(services);
 
