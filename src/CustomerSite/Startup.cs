@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See LICENSE file in the project root for license information.
 
 using Azure.Identity;
+using Jinaga;
 using Marketplace.SaaS.Accelerator.CustomerSite.Controllers;
 using Marketplace.SaaS.Accelerator.CustomerSite.Integration;
 using Marketplace.SaaS.Accelerator.CustomerSite.WebHook;
@@ -24,6 +25,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Marketplace.SaaS;
 using System;
@@ -117,7 +119,13 @@ public class Startup
 
         services
             .Configure<JinagaConfiguration>(Configuration.GetSection("JinagaConfiguration"))
-            .AddSingleton(JinagaClientFactory.Create);
+            .AddSingleton<JinagaClient>(provider =>
+            {
+                var jinagaConfig = provider.GetRequiredService<IOptions<JinagaConfiguration>>();
+                var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+                return JinagaClientFactory.Create(jinagaConfig, loggerFactory);
+            })
+            .AddSingleton<MarketplaceIntegrator>();
 
         InitializeRepositoryServices(services);
 

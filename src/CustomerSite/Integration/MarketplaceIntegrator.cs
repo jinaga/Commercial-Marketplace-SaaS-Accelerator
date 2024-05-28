@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Jinaga;
 
 namespace Marketplace.SaaS.Accelerator.CustomerSite.Integration;
@@ -9,10 +10,10 @@ namespace Marketplace.SaaS.Accelerator.CustomerSite.Integration;
 public class MarketplaceIntegrator
 {
     private readonly JinagaClient jinagaClient;
-    private readonly JinagaConfiguration configuration;
+    private readonly IOptions<JinagaConfiguration> configuration;
     private readonly ILogger<MarketplaceIntegrator> logger;
 
-    public MarketplaceIntegrator(JinagaClient jinagaClient, JinagaConfiguration configuration, ILogger<MarketplaceIntegrator> logger)
+    public MarketplaceIntegrator(JinagaClient jinagaClient, IOptions<JinagaConfiguration> configuration, ILogger<MarketplaceIntegrator> logger)
     {
         this.jinagaClient = jinagaClient;
         this.configuration = configuration;
@@ -124,8 +125,8 @@ public class MarketplaceIntegrator
 
     private Environment CreateEnvironment()
     {
-        var creator = new User(configuration.CreatorPublicKey);
-        var environment = new Environment(creator, configuration.EnvironmentName);
+        var creator = new User(configuration.Value.CreatorPublicKey);
+        var environment = new Environment(creator, configuration.Value.EnvironmentName);
         return environment;
     }
 }
