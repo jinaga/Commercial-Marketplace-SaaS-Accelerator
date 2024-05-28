@@ -18,7 +18,8 @@ public class ServicePrincipalAuthenticationProvider : IHttpAuthenticationProvide
     public void SetRequestHeaders(HttpRequestHeaders headers)
     {
         var byteArray = System.Text.Encoding.ASCII.GetBytes($"{username}:{password}");
-        headers.Authorization = new AuthenticationHeaderValue("Basic", System.Convert.ToBase64String(byteArray));
+        var code = System.Convert.ToBase64String(byteArray);
+        headers.Authorization = new AuthenticationHeaderValue("Basic", code);
     }
 
     public Task<bool> Reauthenticate()
