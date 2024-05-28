@@ -20,6 +20,37 @@ public class MarketplaceIntegrator
         this.logger = logger;
     }
 
+    public async Task Activate(Guid subscriptionId)
+    {
+        var subscription = await CreateSubscription(subscriptionId);
+
+        var activate = new Activate(subscription, DateTime.UtcNow);
+        await jinagaClient.Fact(activate);
+
+        logger.LogInformation($"Activated subscription {subscriptionId}");
+    }
+
+    public async Task Deactivate(Guid subscriptionId)
+    {
+        var subscription = await CreateSubscription(subscriptionId);
+
+        var activationsForSubscription = Given<Subscription>.Match((subscription, facts) =>
+            from activate in facts.OfType<Activate>()
+            where activate.subscription == subscription
+            select activate
+        );
+
+        var activations = await jinagaClient.Query(activationsForSubscription, subscription);
+
+        foreach (var activation in activations)
+        {
+            var deactivate = new Deactivate(activation, DateTime.UtcNow);
+            await jinagaClient.Fact(deactivate);
+
+            logger.LogInformation($"Deactivated subscription {subscriptionId} from {activation.activatedAt}");
+        }
+    }
+
     public async Task ChangePlan(Guid subscriptionId, string planId)
     {
         var environment = CreateEnvironment();
@@ -89,7 +120,7 @@ public class MarketplaceIntegrator
             var reinstate = new Reinstate(suspension, DateTime.UtcNow);
             await jinagaClient.Fact(reinstate);
 
-            logger.LogInformation($"Reinstated subscription {subscriptionId}");
+            logger.LogInformation($"Reinstated subscription {subscriptionId} suspended at {suspension.suspendedAt}");
         }
     }
 

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
+using Marketplace.SaaS.Accelerator.CustomerSite.Integration;
 using Marketplace.SaaS.Accelerator.DataAccess.Contracts;
 using Marketplace.SaaS.Accelerator.DataAccess.Entities;
 using Marketplace.SaaS.Accelerator.Services.Contracts;
@@ -90,6 +91,8 @@ public class HomeController : BaseController
 
     private readonly IWebNotificationService _webNotificationService;
 
+    private readonly MarketplaceIntegrator marketplaceIntegrator;
+
     private SubscriptionService subscriptionService = null;
 
     private ApplicationLogService applicationLogService = null;
@@ -120,7 +123,7 @@ public class HomeController : BaseController
     /// <param name="cloudConfigs">The cloud configs.</param>
     /// <param name="loggerFactory">The logger factory.</param>
     /// <param name="emailService">The email service.</param>
-    public HomeController(SaaSClientLogger<HomeController> logger, IFulfillmentApiService apiService, ISubscriptionsRepository subscriptionRepo, IPlansRepository planRepository, IUsersRepository userRepository, IApplicationLogRepository applicationLogRepository, ISubscriptionLogRepository subscriptionLogsRepo, IApplicationConfigRepository applicationConfigRepository, IEmailTemplateRepository emailTemplateRepository, IOffersRepository offersRepository, IPlanEventsMappingRepository planEventsMappingRepository, IOfferAttributesRepository offerAttributesRepository, IEventsRepository eventsRepository, ILoggerFactory loggerFactory, IEmailService emailService,IWebNotificationService webNotificationService)
+    public HomeController(SaaSClientLogger<HomeController> logger, IFulfillmentApiService apiService, ISubscriptionsRepository subscriptionRepo, IPlansRepository planRepository, IUsersRepository userRepository, IApplicationLogRepository applicationLogRepository, ISubscriptionLogRepository subscriptionLogsRepo, IApplicationConfigRepository applicationConfigRepository, IEmailTemplateRepository emailTemplateRepository, IOffersRepository offersRepository, IPlanEventsMappingRepository planEventsMappingRepository, IOfferAttributesRepository offerAttributesRepository, IEventsRepository eventsRepository, ILoggerFactory loggerFactory, IEmailService emailService,IWebNotificationService webNotificationService, MarketplaceIntegrator marketplaceIntegrator)
     {
         this.apiService = apiService;
         this.subscriptionRepository = subscriptionRepo;
@@ -143,6 +146,7 @@ public class HomeController : BaseController
         this.emailService = emailService;
         this.loggerFactory = loggerFactory;
         this._webNotificationService = webNotificationService;
+        this.marketplaceIntegrator = marketplaceIntegrator;
 
         this.pendingActivationStatusHandlers = new PendingActivationStatusHandler(
             apiService,
@@ -588,6 +592,8 @@ public class HomeController : BaseController
                             }
                             
                             await _webNotificationService.PushExternalWebNotificationAsync(subscriptionId, subscriptionResultExtension.SubscriptionParameters);
+
+                            await marketplaceIntegrator.Activate(subscriptionId);
                         }
                         catch (MarketplaceException fex)
                         {
@@ -613,6 +619,8 @@ public class HomeController : BaseController
                         }
 
                         this.unsubscribeStatusHandlers.Process(subscriptionId);
+
+                        await marketplaceIntegrator.Deactivate(subscriptionId);
                     }
                 }
 
