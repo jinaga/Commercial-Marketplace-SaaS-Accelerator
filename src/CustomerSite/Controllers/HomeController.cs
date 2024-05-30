@@ -284,6 +284,9 @@ public class HomeController : BaseController
                 {
                     this.TempData["ShowWelcomeScreen"] = "True";
                     subscriptionExtension.ShowWelcomeScreen = true;
+                    var jsonPublicKey = await marketplaceIntegrator.GetServicePrincipalPublicKey();
+                    subscriptionExtension.ServicePrincipalPublicKey = jsonPublicKey;
+
                     return this.View(subscriptionExtension);
                 }
             }

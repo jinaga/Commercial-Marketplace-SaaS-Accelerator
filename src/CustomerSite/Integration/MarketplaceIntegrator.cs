@@ -20,6 +20,14 @@ public class MarketplaceIntegrator
         this.logger = logger;
     }
 
+    public async Task<string> GetServicePrincipalPublicKey()
+    {
+        var (user, profile) = await jinagaClient.Login();
+        var jsonPublicKey = System.Text.Json.JsonSerializer.Serialize(user.publicKey);
+        logger.LogInformation($"Service principal public key: {jsonPublicKey}");
+        return jsonPublicKey;
+    }
+
     public async Task Activate(Guid subscriptionId)
     {
         var subscription = await CreateSubscription(subscriptionId);

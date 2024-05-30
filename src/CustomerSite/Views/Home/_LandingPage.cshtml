@@ -229,6 +229,13 @@ else
                     <li>Click <b>Configure Account </b> after the subscription created</li>
                 </ul>
             </div>
+            @if (!string.IsNullOrEmpty(Model.ServicePrincipalPublicKey))
+            {
+                <div>
+                    <p>Trust the following service principal public key:</p>
+                    @Html.DisplayFor(model => model.ServicePrincipalPublicKey)
+                </div>
+            }
         </div>
     </div>
 }
