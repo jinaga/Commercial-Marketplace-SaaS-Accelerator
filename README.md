@@ -1,5 +1,37 @@
 # Microsoft Commercial Marketplace - Community Code for SaaS Applications
 
+Log into the portal with the account that you want to be an administrator.
+Get the public key.
+
+Create a single-use principal:
+
+```csharp
+// Create an environment and make the logged in user an administrator.
+var user = new User("administrator public key");
+
+var environment = await jinagaClient.SingleUse(async principal =>
+{
+    var environment = await jinagaClient.Fact(new Environment(principal, "test"));
+    await jinagaClient.Fact(new Administrator(user, environment, DateTime.UtcNow));
+    return environment;
+});
+
+System.Text.Json.JsonSerializer.Serialize(environment.creator.publicKey)
+```
+
+Set environment variables in `raas-portal` to configure Jinaga.
+
+- JinagaConfiguration__JinagaEndpoint = "https://app.jinaga.com/jinaga"
+- JinagaConfiguration__ServicePrincipalUserName = "SaasAccelerator"
+- JinagaConfiguration__ServicePrincipalPassword = "randomlygeneratedpassword"
+- JinagaConfiguration__CreatorPublicKey = "-----BEGIN PUBLIC KEY-----\r\nMIIBCgKCAQEAoCTbrASql8xsTby30NwsizfdDVrfg\u002B8B6y/4brCoyjbGMRpQgh\u002Ba\r\niDvcbNUsafgAyeUgxqOcpXmdyeHL3A4z0KjI1Ti5Us6RADSqve7yt21WZXxpGcmr\r\nYMlxwCJ5vmaxGN4DYAmWhZI7\u002B4zZ6wBj\u002BJarM8kEOz\u002BH3RMsnp05qAoLmx9an\u002Bpg\r\nQT8X7pBc24b\u002BuS9sAHl/hboQ/Rd7ivmErbvlyZiXktj8epuETM7VVn4aPMQqezT9\r\nNCQA6kHRC49pTrv9qtGPhI6JXIODG/blMPG6WtNY\u002B7zjEOYAtKf6isq53r1d0hVa\r\nHbdDnPpLQmoqY6/xi17nMRsX3GrVdt7AgQIDAQAB\r\n-----END PUBLIC KEY-----\r\n"
+- JinagaConfiguration__EnvironmentName = "test or production"
+
+Set the same service principal and password in the Jinaga portal:
+
+- SERVICE_PRINCIPAL_USERNAMES = "SaasAccelerator"
+- SERVICE_PRINCIPAL_PASSWORDS = "randomlygeneratedpassword"
+
 <!-- no toc -->
 - [Introduction](#introduction)
 - [Intended Use](#intended-use)
