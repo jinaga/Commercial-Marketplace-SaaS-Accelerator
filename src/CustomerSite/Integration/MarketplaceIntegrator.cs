@@ -61,7 +61,8 @@ public class MarketplaceIntegrator
 
         var activationsForSubscription = Given<Subscription>.Match((subscription, facts) =>
             from activate in facts.OfType<Activate>()
-            where activate.subscription == subscription
+            where activate.subscription == subscription &&
+                !facts.Any<Deactivate>(d => d.activate == activate)
             select activate
         );
 
@@ -147,7 +148,8 @@ public class MarketplaceIntegrator
 
         var suspensionsForSubscription = Given<Subscription>.Match((subscription, facts) =>
             from suspend in facts.OfType<Suspend>()
-            where suspend.subscription == subscription
+            where suspend.subscription == subscription &&
+                !facts.Any<Reinstate>(r => r.suspend == suspend)
             select suspend
         );
 
@@ -213,7 +215,8 @@ public class MarketplaceIntegrator
 
         var plansForSubscription = Given<Subscription>.Match((subscription, facts) =>
             from subscriptionPlan in facts.OfType<SubscriptionPlan>()
-            where subscriptionPlan.subscription == subscription
+            where subscriptionPlan.subscription == subscription &&
+                !facts.Any<SubscriptionPlan>(next => next.prior.Contains(subscriptionPlan))
             select subscriptionPlan
         );
 
@@ -231,7 +234,8 @@ public class MarketplaceIntegrator
     {
         var quantitiesForSubscription = Given<Subscription>.Match((subscription, facts) =>
             from subscriptionQuantity in facts.OfType<SubscriptionQuantity>()
-            where subscriptionQuantity.subscription == subscription
+            where subscriptionQuantity.subscription == subscription &&
+                !facts.Any<SubscriptionQuantity>(next => next.prior.Contains(subscriptionQuantity))
             select subscriptionQuantity
         );
 
@@ -249,7 +253,8 @@ public class MarketplaceIntegrator
     {
         var usersForSubscription = Given<Subscription>.Match((subscription, facts) =>
             from subscriptionUser in facts.OfType<SubscriptionUserIdentity>()
-            where subscriptionUser.subscription == subscription
+            where subscriptionUser.subscription == subscription &&
+                !facts.Any<SubscriptionUserIdentity>(next => next.prior.Contains(subscriptionUser))
             select subscriptionUser
         );
 
