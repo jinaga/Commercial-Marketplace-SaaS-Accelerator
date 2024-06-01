@@ -31,6 +31,8 @@ public class MarketplaceIntegrator
 
     public async Task Activate(Guid subscriptionId)
     {
+        logger.LogInformation($"Activating subscription {subscriptionId}");
+
         var subscription = await CreateSubscription(subscriptionId);
 
         var activate = new Activate(subscription, DateTime.UtcNow);
@@ -41,6 +43,8 @@ public class MarketplaceIntegrator
 
     public async Task Deactivate(Guid subscriptionId)
     {
+        logger.LogInformation($"Deactivating subscription {subscriptionId}");
+
         var subscription = await CreateSubscription(subscriptionId);
 
         var activationsForSubscription = Given<Subscription>.Match((subscription, facts) =>
@@ -62,6 +66,8 @@ public class MarketplaceIntegrator
 
     public async Task ChangePlan(Guid subscriptionId, string planId)
     {
+        logger.LogInformation($"Changing plan for subscription {subscriptionId} to {planId}");
+
         var environment = CreateEnvironment();
         var plan = new Plan(environment, planId);
         var subscription = await CreateSubscription(subscriptionId);
@@ -84,6 +90,8 @@ public class MarketplaceIntegrator
 
     public async Task ChangeQuantity(Guid subscriptionId, int quantity)
     {
+        logger.LogInformation($"Changing quantity for subscription {subscriptionId} to {quantity}");
+
         var subscription = await CreateSubscription(subscriptionId);
 
         var quantitiesForSubscription = Given<Subscription>.Match((subscription, facts) =>
@@ -104,6 +112,8 @@ public class MarketplaceIntegrator
 
     public async Task Suspend(Guid subscriptionId)
     {
+        logger.LogInformation($"Suspending subscription {subscriptionId}");
+
         var subscription = await CreateSubscription(subscriptionId);
 
         var suspend = new Suspend(subscription, DateTime.UtcNow);
@@ -114,6 +124,8 @@ public class MarketplaceIntegrator
 
     public async Task Reinstate(Guid subscriptionId)
     {
+        logger.LogInformation($"Reinstating subscription {subscriptionId}");
+
         var subscription = await CreateSubscription(subscriptionId);
 
         var suspensionsForSubscription = Given<Subscription>.Match((subscription, facts) =>
@@ -135,6 +147,8 @@ public class MarketplaceIntegrator
 
     public async Task Renew(Guid subscriptionId)
     {
+        logger.LogInformation($"Renewing subscription {subscriptionId}");
+
         var subscription = await CreateSubscription(subscriptionId);
 
         var utcNow = DateTime.UtcNow;
@@ -148,6 +162,8 @@ public class MarketplaceIntegrator
 
     public async Task Unsubscribe(Guid subscriptionId)
     {
+        logger.LogInformation($"Unsubscribing subscription {subscriptionId}");
+
         var subscription = await CreateSubscription(subscriptionId);
 
         var unsubscribe = new Unsubscribe(subscription);
