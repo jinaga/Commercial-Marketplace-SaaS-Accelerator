@@ -96,6 +96,11 @@ public class MarketplaceIntegrator
 
     public async Task ChangeQuantity(Guid subscriptionId, int quantity)
     {
+        if (quantity < 1)
+        {
+            quantity = 1;
+        }
+
         logger.LogInformation($"Changing quantity for subscription {subscriptionId} to {quantity}");
 
         var subscription = await CreateSubscription(subscriptionId);
