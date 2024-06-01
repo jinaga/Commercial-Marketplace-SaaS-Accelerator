@@ -165,7 +165,10 @@ public class MarketplaceIntegrator
 
     private Environment CreateEnvironment()
     {
-        var publicKey = Regex.Unescape(configuration.Value.CreatorPublicKey.Trim('"'));
+        string encoded = configuration.Value.CreatorPublicKey;
+        logger.LogInformation("Decoding string length {length}: {value}", encoded.Length, encoded);
+        var publicKey = Regex.Unescape(encoded.Trim('"'));
+        logger.LogInformation("Decoded to length {length}: {value}", publicKey.Length, publicKey);
         var creator = new User(publicKey);
         var environment = new Environment(creator, configuration.Value.EnvironmentName);
         return environment;
