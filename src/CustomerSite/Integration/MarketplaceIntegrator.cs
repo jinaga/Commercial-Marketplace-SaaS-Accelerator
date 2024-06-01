@@ -29,6 +29,15 @@ public class MarketplaceIntegrator
         return jsonPublicKey;
     }
 
+    public async Task Subscribe(Guid subscriptionId)
+    {
+        logger.LogInformation($"Creating subscription {subscriptionId}");
+
+        await CreateSubscription(subscriptionId);
+
+        logger.LogInformation($"Created subscription {subscriptionId}");
+    }
+
     public async Task Activate(Guid subscriptionId)
     {
         logger.LogInformation($"Activating subscription {subscriptionId}");

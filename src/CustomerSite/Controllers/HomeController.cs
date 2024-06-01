@@ -588,15 +588,17 @@ public class HomeController : BaseController
                                 }
 
                                 this.pendingActivationStatusHandlers.Process(subscriptionId);
+
+                                await marketplaceIntegrator.Activate(subscriptionId);
                             }
                             else
                             {
                                 this.pendingFulfillmentStatusHandlers.Process(subscriptionId);
+
+                                await marketplaceIntegrator.Subscribe(subscriptionId);
                             }
                             
                             await _webNotificationService.PushExternalWebNotificationAsync(subscriptionId, subscriptionResultExtension.SubscriptionParameters);
-
-                            await marketplaceIntegrator.Activate(subscriptionId);
                         }
                         catch (MarketplaceException fex)
                         {

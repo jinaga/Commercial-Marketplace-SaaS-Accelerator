@@ -1,6 +1,7 @@
 Run the following script on the Azure Portal to deploy:
 
 ```bash
+rm -rf ./Commercial-Marketplace-SaaS-Accelerator
 wget https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh; `
 chmod +x dotnet-install.sh; `
 ./dotnet-install.sh -version 6.0.417; `
