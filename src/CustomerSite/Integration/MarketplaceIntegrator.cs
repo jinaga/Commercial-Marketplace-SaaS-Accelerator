@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -164,7 +165,8 @@ public class MarketplaceIntegrator
 
     private Environment CreateEnvironment()
     {
-        var creator = new User(configuration.Value.CreatorPublicKey);
+        var publicKey = Regex.Unescape(configuration.Value.CreatorPublicKey.Trim('"'));
+        var creator = new User(publicKey);
         var environment = new Environment(creator, configuration.Value.EnvironmentName);
         return environment;
     }
