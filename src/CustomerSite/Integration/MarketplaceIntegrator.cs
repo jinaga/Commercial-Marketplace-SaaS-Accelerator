@@ -29,11 +29,14 @@ public class MarketplaceIntegrator
         return jsonPublicKey;
     }
 
-    public async Task Subscribe(Guid subscriptionId)
+    public async Task Subscribe(Guid subscriptionId, string planId, int quantity, string userEmailAddress)
     {
         logger.LogInformation($"Creating subscription {subscriptionId}");
 
-        await CreateSubscription(subscriptionId);
+        var subscription = await CreateSubscription(subscriptionId);
+        await SetPlan(subscription, planId);
+        await SetQuantity(subscription, quantity);
+        await SetUser(subscription, userEmailAddress);
 
         logger.LogInformation($"Created subscription {subscriptionId}");
     }
@@ -77,23 +80,16 @@ public class MarketplaceIntegrator
     {
         logger.LogInformation($"Changing plan for subscription {subscriptionId} to {planId}");
 
-        var environment = CreateEnvironment();
-        var plan = new Plan(environment, planId);
         var subscription = await CreateSubscription(subscriptionId);
 
-        var plansForSubscription = Given<Subscription>.Match((subscription, facts) =>
-            from subscriptionPlan in facts.OfType<SubscriptionPlan>()
-            where subscriptionPlan.subscription == subscription
-            select subscriptionPlan
-        );
-
-        var existingPlans = await jinagaClient.Query(plansForSubscription, subscription);
-        if (existingPlans.Count() != 1 || existingPlans.Single().plan.planId != planId)
+        var changed = await SetPlan(subscription, planId);
+        if (changed)
         {
-            var subscriptionPlan = new SubscriptionPlan(subscription, plan, existingPlans.ToArray());
-            await jinagaClient.Fact(subscriptionPlan);
-
             logger.LogInformation($"Changed plan for subscription {subscriptionId} to {planId}");
+        }
+        else
+        {
+            logger.LogInformation($"Plan for subscription {subscriptionId} is already {planId}");
         }
     }
 
@@ -103,19 +99,31 @@ public class MarketplaceIntegrator
 
         var subscription = await CreateSubscription(subscriptionId);
 
-        var quantitiesForSubscription = Given<Subscription>.Match((subscription, facts) =>
-            from subscriptionQuantity in facts.OfType<SubscriptionQuantity>()
-            where subscriptionQuantity.subscription == subscription
-            select subscriptionQuantity
-        );
-
-        var existingQuantities = await jinagaClient.Query(quantitiesForSubscription, subscription);
-        if (existingQuantities.Count() != 1 || existingQuantities.Single().quantity != quantity)
+        var changed = await SetQuantity(subscription, quantity);
+        if (changed)
         {
-            var subscriptionQuantity = new SubscriptionQuantity(subscription, quantity, existingQuantities.ToArray());
-            await jinagaClient.Fact(subscriptionQuantity);
-
             logger.LogInformation($"Changed quantity for subscription {subscriptionId} to {quantity}");
+        }
+        else
+        {
+            logger.LogInformation($"Quantity for subscription {subscriptionId} is already {quantity}");
+        }
+    }
+
+    public async Task ChangeUser(Guid subscriptionId, string userEmailAddress)
+    {
+        logger.LogInformation($"Changing user for subscription {subscriptionId} to {userEmailAddress}");
+
+        var subscription = await CreateSubscription(subscriptionId);
+
+        bool changed = await SetUser(subscription, userEmailAddress);
+        if (changed)
+        {
+            logger.LogInformation($"Changed user for subscription {subscriptionId} to {userEmailAddress}");
+        }
+        else
+        {
+            logger.LogInformation($"User for subscription {subscriptionId} is already {userEmailAddress}");
         }
     }
 
@@ -197,5 +205,64 @@ public class MarketplaceIntegrator
         var creator = new User(publicKey);
         var environment = new Environment(creator, configuration.Value.EnvironmentName);
         return environment;
+    }
+
+    private async Task<bool> SetPlan(Subscription subscription, string planId)
+    {
+        var plan = new Plan(subscription.environment, planId);
+
+        var plansForSubscription = Given<Subscription>.Match((subscription, facts) =>
+            from subscriptionPlan in facts.OfType<SubscriptionPlan>()
+            where subscriptionPlan.subscription == subscription
+            select subscriptionPlan
+        );
+
+        var existingPlans = await jinagaClient.Query(plansForSubscription, subscription);
+        if (existingPlans.Count() != 1 || existingPlans.Single().plan.planId != planId)
+        {
+            var subscriptionPlan = new SubscriptionPlan(subscription, plan, existingPlans.ToArray());
+            await jinagaClient.Fact(subscriptionPlan);
+            return true;
+        }
+        return false;
+    }
+
+    private async Task<bool> SetQuantity(Subscription subscription, int quantity)
+    {
+        var quantitiesForSubscription = Given<Subscription>.Match((subscription, facts) =>
+            from subscriptionQuantity in facts.OfType<SubscriptionQuantity>()
+            where subscriptionQuantity.subscription == subscription
+            select subscriptionQuantity
+        );
+
+        var existingQuantities = await jinagaClient.Query(quantitiesForSubscription, subscription);
+        if (existingQuantities.Count() != 1 || existingQuantities.Single().quantity != quantity)
+        {
+            var subscriptionQuantity = new SubscriptionQuantity(subscription, quantity, existingQuantities.ToArray());
+            await jinagaClient.Fact(subscriptionQuantity);
+            return true;
+        }
+        return false;
+    }
+
+    private async Task<bool> SetUser(Subscription subscription, string userEmailAddress)
+    {
+        var usersForSubscription = Given<Subscription>.Match((subscription, facts) =>
+            from subscriptionUser in facts.OfType<SubscriptionUserIdentity>()
+            where subscriptionUser.subscription == subscription
+            select subscriptionUser
+        );
+
+        var existingUsers = await jinagaClient.Query(usersForSubscription, subscription);
+        if (existingUsers.Count() != 1 || existingUsers.Single().userIdentity.userId != userEmailAddress)
+        {
+            var user = new UserIdentity(subscription.environment, userEmailAddress);
+            var subscriptionUser = new SubscriptionUserIdentity(subscription, user, existingUsers.ToArray());
+            await jinagaClient.Fact(subscriptionUser);
+
+            return true;
+        }
+
+        return false;
     }
 }

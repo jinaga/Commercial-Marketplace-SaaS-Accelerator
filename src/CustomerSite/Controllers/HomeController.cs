@@ -252,6 +252,8 @@ public class HomeController : BaseController
                                 CreateDate = DateTime.Now,
                             };
                             this.subscriptionLogRepository.Save(auditLog);
+
+                            await marketplaceIntegrator.Subscribe(newSubscription.SubscriptionId, newSubscription.PlanId, newSubscription.Quantity, this.CurrentUserEmailAddress);
                         }
 
                         subscriptionExtension = this.subscriptionService.GetSubscriptionsBySubscriptionId(newSubscription.SubscriptionId, true);
@@ -594,8 +596,6 @@ public class HomeController : BaseController
                             else
                             {
                                 this.pendingFulfillmentStatusHandlers.Process(subscriptionId);
-
-                                await marketplaceIntegrator.Subscribe(subscriptionId);
                             }
                             
                             await _webNotificationService.PushExternalWebNotificationAsync(subscriptionId, subscriptionResultExtension.SubscriptionParameters);
