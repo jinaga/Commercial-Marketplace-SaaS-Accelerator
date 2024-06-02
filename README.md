@@ -27,10 +27,14 @@ Set environment variables in `raas-portal` to configure Jinaga.
 - JinagaConfiguration__CreatorPublicKey = "-----BEGIN PUBLIC KEY-----\r\nMIIBCgKCAQEAoCTbrASql8xsTby30NwsizfdDVrfg\u002B8B6y/4brCoyjbGMRpQgh\u002Ba\r\niDvcbNUsafgAyeUgxqOcpXmdyeHL3A4z0KjI1Ti5Us6RADSqve7yt21WZXxpGcmr\r\nYMlxwCJ5vmaxGN4DYAmWhZI7\u002B4zZ6wBj\u002BJarM8kEOz\u002BH3RMsnp05qAoLmx9an\u002Bpg\r\nQT8X7pBc24b\u002BuS9sAHl/hboQ/Rd7ivmErbvlyZiXktj8epuETM7VVn4aPMQqezT9\r\nNCQA6kHRC49pTrv9qtGPhI6JXIODG/blMPG6WtNY\u002B7zjEOYAtKf6isq53r1d0hVa\r\nHbdDnPpLQmoqY6/xi17nMRsX3GrVdt7AgQIDAQAB\r\n-----END PUBLIC KEY-----\r\n"
 - JinagaConfiguration__EnvironmentName = "test or production"
 
-Set the same service principal and password in the Jinaga portal:
+Set the same service principal username and password in the Jinaga portal.
+Use a plural name, as the portal supports comma-separated parallel list.
+Also set the same creator public key and environment name:
 
 - SERVICE_PRINCIPAL_USERNAMES = "SaasAccelerator"
 - SERVICE_PRINCIPAL_PASSWORDS = "randomlygeneratedpassword"
+- CREATOR_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\r\nMIIBCgKCAQEAoCTbrASql8xsTby30NwsizfdDVrfg\u002B8B6y/4brCoyjbGMRpQgh\u002Ba\r\niDvcbNUsafgAyeUgxqOcpXmdyeHL3A4z0KjI1Ti5Us6RADSqve7yt21WZXxpGcmr\r\nYMlxwCJ5vmaxGN4DYAmWhZI7\u002B4zZ6wBj\u002BJarM8kEOz\u002BH3RMsnp05qAoLmx9an\u002Bpg\r\nQT8X7pBc24b\u002BuS9sAHl/hboQ/Rd7ivmErbvlyZiXktj8epuETM7VVn4aPMQqezT9\r\nNCQA6kHRC49pTrv9qtGPhI6JXIODG/blMPG6WtNY\u002B7zjEOYAtKf6isq53r1d0hVa\r\nHbdDnPpLQmoqY6/xi17nMRsX3GrVdt7AgQIDAQAB\r\n-----END PUBLIC KEY-----\r\n"
+- ENVIRONMENT_NAME = "test"
 
 <!-- no toc -->
 - [Introduction](#introduction)

@@ -214,6 +214,8 @@ public class MarketplaceIntegrator
 
     private async Task<bool> SetUser(Subscription subscription, string userEmailAddress)
     {
+        userEmailAddress = userEmailAddress.ToLowerInvariant();
+
         var usersForSubscription = Given<Subscription>.Match((subscription, facts) =>
             from subscriptionUser in facts.OfType<SubscriptionUserIdentity>()
             where subscriptionUser.subscription == subscription &&
