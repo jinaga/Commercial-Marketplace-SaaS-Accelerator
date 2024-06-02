@@ -7,4 +7,5 @@ public class JinagaConfiguration
     public string ServicePrincipalPassword { get; set; }
     public string CreatorPublicKey { get; set; }
     public string EnvironmentName { get; set; }
+    public bool Setup { get; set; }
 }

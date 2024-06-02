@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Marketplace.SaaS.Accelerator.CustomerSite.Controllers;
 
@@ -93,6 +94,8 @@ public class HomeController : BaseController
 
     private readonly MarketplaceIntegrator marketplaceIntegrator;
 
+    private readonly IOptions<JinagaConfiguration> configuration;
+
     private SubscriptionService subscriptionService = null;
 
     private ApplicationLogService applicationLogService = null;
@@ -123,7 +126,7 @@ public class HomeController : BaseController
     /// <param name="cloudConfigs">The cloud configs.</param>
     /// <param name="loggerFactory">The logger factory.</param>
     /// <param name="emailService">The email service.</param>
-    public HomeController(SaaSClientLogger<HomeController> logger, IFulfillmentApiService apiService, ISubscriptionsRepository subscriptionRepo, IPlansRepository planRepository, IUsersRepository userRepository, IApplicationLogRepository applicationLogRepository, ISubscriptionLogRepository subscriptionLogsRepo, IApplicationConfigRepository applicationConfigRepository, IEmailTemplateRepository emailTemplateRepository, IOffersRepository offersRepository, IPlanEventsMappingRepository planEventsMappingRepository, IOfferAttributesRepository offerAttributesRepository, IEventsRepository eventsRepository, ILoggerFactory loggerFactory, IEmailService emailService,IWebNotificationService webNotificationService, MarketplaceIntegrator marketplaceIntegrator)
+    public HomeController(SaaSClientLogger<HomeController> logger, IFulfillmentApiService apiService, ISubscriptionsRepository subscriptionRepo, IPlansRepository planRepository, IUsersRepository userRepository, IApplicationLogRepository applicationLogRepository, ISubscriptionLogRepository subscriptionLogsRepo, IApplicationConfigRepository applicationConfigRepository, IEmailTemplateRepository emailTemplateRepository, IOffersRepository offersRepository, IPlanEventsMappingRepository planEventsMappingRepository, IOfferAttributesRepository offerAttributesRepository, IEventsRepository eventsRepository, ILoggerFactory loggerFactory, IEmailService emailService, IWebNotificationService webNotificationService, MarketplaceIntegrator marketplaceIntegrator, IOptions<JinagaConfiguration> configuration)
     {
         this.apiService = apiService;
         this.subscriptionRepository = subscriptionRepo;
@@ -147,6 +150,7 @@ public class HomeController : BaseController
         this.loggerFactory = loggerFactory;
         this._webNotificationService = webNotificationService;
         this.marketplaceIntegrator = marketplaceIntegrator;
+        this.configuration = configuration;
 
         this.pendingActivationStatusHandlers = new PendingActivationStatusHandler(
             apiService,
@@ -286,8 +290,13 @@ public class HomeController : BaseController
                 {
                     this.TempData["ShowWelcomeScreen"] = "True";
                     subscriptionExtension.ShowWelcomeScreen = true;
-                    var jsonPublicKey = await marketplaceIntegrator.GetServicePrincipalPublicKey();
-                    subscriptionExtension.ServicePrincipalPublicKey = jsonPublicKey;
+
+                    if (this.configuration.Value.Setup)
+                    {
+                        // Display setup information.
+                        var jsonPublicKey = await marketplaceIntegrator.GetServicePrincipalPublicKey();
+                        subscriptionExtension.ServicePrincipalPublicKey = jsonPublicKey;
+                    }
 
                     return this.View(subscriptionExtension);
                 }
