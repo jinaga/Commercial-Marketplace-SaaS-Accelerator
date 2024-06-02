@@ -35,7 +35,6 @@ public class MarketplaceIntegrator
 
         var subscription = await CreateSubscription(subscriptionId);
         await SetPlan(subscription, planId);
-        await SetQuantity(subscription, quantity);
         await SetUser(subscription, userEmailAddress);
 
         logger.LogInformation($"Created subscription {subscriptionId}");
@@ -91,28 +90,6 @@ public class MarketplaceIntegrator
         else
         {
             logger.LogInformation($"Plan for subscription {subscriptionId} is already {planId}");
-        }
-    }
-
-    public async Task ChangeQuantity(Guid subscriptionId, int quantity)
-    {
-        if (quantity < 1)
-        {
-            quantity = 1;
-        }
-
-        logger.LogInformation($"Changing quantity for subscription {subscriptionId} to {quantity}");
-
-        var subscription = await CreateSubscription(subscriptionId);
-
-        var changed = await SetQuantity(subscription, quantity);
-        if (changed)
-        {
-            logger.LogInformation($"Changed quantity for subscription {subscriptionId} to {quantity}");
-        }
-        else
-        {
-            logger.LogInformation($"Quantity for subscription {subscriptionId} is already {quantity}");
         }
     }
 
@@ -230,25 +207,6 @@ public class MarketplaceIntegrator
         {
             var subscriptionPlan = new SubscriptionPlan(subscription, plan, existingPlans.ToArray());
             await jinagaClient.Fact(subscriptionPlan);
-            return true;
-        }
-        return false;
-    }
-
-    private async Task<bool> SetQuantity(Subscription subscription, int quantity)
-    {
-        var quantitiesForSubscription = Given<Subscription>.Match((subscription, facts) =>
-            from subscriptionQuantity in facts.OfType<SubscriptionQuantity>()
-            where subscriptionQuantity.subscription == subscription &&
-                !facts.Any<SubscriptionQuantity>(next => next.prior.Contains(subscriptionQuantity))
-            select subscriptionQuantity
-        );
-
-        var existingQuantities = await jinagaClient.Query(quantitiesForSubscription, subscription);
-        if (existingQuantities.Count() != 1 || existingQuantities.Single().quantity != quantity)
-        {
-            var subscriptionQuantity = new SubscriptionQuantity(subscription, quantity, existingQuantities.ToArray());
-            await jinagaClient.Fact(subscriptionQuantity);
             return true;
         }
         return false;

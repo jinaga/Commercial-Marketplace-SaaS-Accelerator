@@ -235,8 +235,6 @@ public class WebHookHandler : IWebhookHandler
         auditLog.NewValue = payload.Quantity.ToString();
         this.subscriptionsLogRepository.Save(auditLog);
 
-        await marketplaceIntegrator.ChangeQuantity(payload.SubscriptionId, payload.Quantity).ConfigureAwait(false);
-
         await Task.CompletedTask;
     }
 

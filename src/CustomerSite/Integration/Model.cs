@@ -36,9 +36,6 @@ public record Plan(Environment environment, string planId);
 [FactType("Azure.SubscriptionPlan")]
 public record SubscriptionPlan(Subscription subscription, Plan plan, SubscriptionPlan[] prior);
 
-[FactType("Azure.SubscriptionQuantity")]
-public record SubscriptionQuantity(Subscription subscription, int quantity, SubscriptionQuantity[] prior);
-
 [FactType("Azure.Subscription.Activate")]
 public record Activate(Subscription subscription, DateTime activatedAt);
 
