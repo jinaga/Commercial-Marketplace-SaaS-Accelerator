@@ -1,0 +1,14 @@
+{
+    "environment": "local",
+    "settings": {
+        "local": {
+            "jinagaEndpoint": "http://localhost:8000/jinaga",
+            "cookie": null,
+            "environmentIdentifier": "test",
+            "raasCreator": null,
+            "raasServicePrincipal": null,
+            "azureCreator": null,
+            "azureServicePrincipal": null
+        }
+    }
+}

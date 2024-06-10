@@ -362,3 +362,4 @@ src/Marketplace.SaaS.Accelerator.CustomerSite/appsettings.Development.json
 .vscode/launch.json
 .vscode/tasks.json
 docs/notebooks/Production.ipynb
+docs/notebooks/3-operations/configuration.json
