@@ -257,7 +257,7 @@ public class HomeController : BaseController
                             };
                             this.subscriptionLogRepository.Save(auditLog);
 
-                            await marketplaceIntegrator.Subscribe(newSubscription.SubscriptionId, newSubscription.PlanId, newSubscription.Quantity, this.CurrentUserEmailAddress);
+                            await marketplaceIntegrator.Subscribe(newSubscription.SubscriptionId, newSubscription.SubscriptionName, newSubscription.PlanId, newSubscription.Quantity, this.CurrentUserEmailAddress);
                         }
 
                         subscriptionExtension = this.subscriptionService.GetSubscriptionsBySubscriptionId(newSubscription.SubscriptionId, true);

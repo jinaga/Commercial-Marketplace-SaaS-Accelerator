@@ -21,6 +21,9 @@ public record RevokeServicePrincipal(ServicePrincipal servicePrincipal);
 [FactType("Azure.Subscription")]
 public record Subscription(Environment environment, Guid subscriptionId);
 
+[FactType("Azure.Subscription.Name")]
+public record SubscriptionName(Subscription subscription, string value, SubscriptionName[] prior);
+
 [FactType("Azure.Subscription.Unsubscribe")]
 public record Unsubscribe(Subscription subscription);
 

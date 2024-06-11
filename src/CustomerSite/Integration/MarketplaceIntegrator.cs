@@ -29,11 +29,12 @@ public class MarketplaceIntegrator
         return jsonPublicKey;
     }
 
-    public async Task Subscribe(Guid subscriptionId, string planId, int quantity, string userEmailAddress)
+    public async Task Subscribe(Guid subscriptionId, string subscriptionName, string planId, int quantity, string userEmailAddress)
     {
         logger.LogInformation($"Creating subscription {subscriptionId}");
 
         var subscription = await CreateSubscription(subscriptionId);
+        await SetName(subscription, subscriptionName);
         await SetPlan(subscription, planId);
         await SetUser(subscription, userEmailAddress);
 
@@ -189,6 +190,25 @@ public class MarketplaceIntegrator
         var creator = new User(publicKey);
         var environment = new Environment(creator, configuration.Value.EnvironmentName);
         return environment;
+    }
+
+    private async Task<bool> SetName(Subscription subscription, string subscriptionName)
+    {
+        var namesForSubscription = Given<Subscription>.Match((subscription, facts) =>
+            from subscriptionName in facts.OfType<SubscriptionName>()
+            where subscriptionName.subscription == subscription &&
+                !facts.Any<SubscriptionName>(next => next.prior.Contains(subscriptionName))
+            select subscriptionName
+        );
+
+        var existingNames = await jinagaClient.Query(namesForSubscription, subscription);
+        if (existingNames.Count() != 1 || existingNames.Single().value != subscriptionName)
+        {
+            var name = new SubscriptionName(subscription, subscriptionName, existingNames.ToArray());
+            await jinagaClient.Fact(name);
+            return true;
+        }
+        return false;
     }
 
     private async Task<bool> SetPlan(Subscription subscription, string planId)
