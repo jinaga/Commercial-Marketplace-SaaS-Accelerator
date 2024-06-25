@@ -5,10 +5,6 @@
         //ViewData["Title"] = "Home";
     }*@
 
-@section MetaRefresh {
-    <meta http-equiv="refresh" content="5" />
-}
-
 <div class="container">
     <form method="post">
         <div class="cm-panel-default mt40">
@@ -27,3 +23,8 @@
         </div>
     </form>
 </div>
+<script>
+    setTimeout(function() {
+        window.location.reload();
+    }, 5000); // 5000 milliseconds = 5 seconds
+</script>
