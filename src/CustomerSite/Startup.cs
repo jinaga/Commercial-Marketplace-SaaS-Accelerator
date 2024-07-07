@@ -99,6 +99,7 @@ public class Startup
                 options.TokenValidationParameters.NameClaimType = ClaimConstants.CLAIM_NAME; //This does not seem to take effect on User.Identity. See Note in CustomClaimsTransformation.cs
                 options.TokenValidationParameters.ValidateIssuer = false;
             });
+        services.AddApplicationInsightsTelemetry();
         services
             .AddTransient<IClaimsTransformation, CustomClaimsTransformation>()
             .AddScoped<ExceptionHandlerAttribute>()
