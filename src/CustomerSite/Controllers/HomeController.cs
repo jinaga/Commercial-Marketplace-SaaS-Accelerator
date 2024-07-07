@@ -559,6 +559,10 @@ public class HomeController : BaseController
                 {
                     this.logger.Info("GetPartnerSubscription");
                     var oldValue = this.subscriptionService.GetPartnerSubscription(this.CurrentUserEmailAddress, subscriptionId, true).FirstOrDefault();
+                    if (oldValue == null)
+                    {
+                        throw new MarketplaceException("Subscription not found");
+                    }
                     Plans planDetail = this.planRepository.GetById(oldValue.PlanId);
                     this.logger.Info("GetUserIdFromEmailAddress");
                     var currentUserId = this.userService.GetUserIdFromEmailAddress(this.CurrentUserEmailAddress);
